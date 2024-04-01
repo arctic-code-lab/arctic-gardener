@@ -1,2 +1,6 @@
 github.com/stianeikeland/go-rpio/v4 v4.6.1-0.20211202141945-d8d85b35367c h1:+Rv//NqMwfWyjDoZH/prNOV/Nd/Pmz1eABurLyUjnSk=
 github.com/stianeikeland/go-rpio/v4 v4.6.1-0.20211202141945-d8d85b35367c/go.mod h1:A3GvHxC1Om5zaId+HqB3HKqx4K/AqeckxB7qRjxMK7o=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=

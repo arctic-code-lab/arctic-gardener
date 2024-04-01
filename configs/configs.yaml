@@ -1,0 +1,7 @@
+pollIntervalMs: 1500
+wetThreshold: 500
+dryThreshold: 300
+pins:
+  - 4
+  - 17
+  - 27

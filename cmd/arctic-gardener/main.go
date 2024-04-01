@@ -1,44 +1,49 @@
-/*
-Rev 2 and 3 Raspberry Pi
-+-----+---------+----------+---------+-----+
-| BCM |   Name  | Physical | Name    | BCM |
-+-----+---------+----++----+---------+-----+
-|     |    3.3v |  1 || 2  | 5v      |     |
-|   2 |   SDA 1 |  3 || 4  | 5v      |     |
-|   3 |   SCL 1 |  5 || 6  | 0v      |     |
-|   4 | GPIO  7 |  7 || 8  | TxD     | 14  |
-|     |      0v |  9 || 10 | RxD     | 15  |
-|  17 | GPIO  0 | 11 || 12 | GPIO  1 | 18  |
-|  27 | GPIO  2 | 13 || 14 | 0v      |     |
-|  22 | GPIO  3 | 15 || 16 | GPIO  4 | 23  |
-|     |    3.3v | 17 || 18 | GPIO  5 | 24  |
-|  10 |    MOSI | 19 || 20 | 0v      |     |
-|   9 |    MISO | 21 || 22 | GPIO  6 | 25  |
-|  11 |    SCLK | 23 || 24 | CE0     | 8   |
-|     |      0v | 25 || 26 | CE1     | 7   |
-|   0 |   SDA 0 | 27 || 28 | SCL 0   | 1   |
-|   5 | GPIO 21 | 29 || 30 | 0v      |     |
-|   6 | GPIO 22 | 31 || 32 | GPIO 26 | 12  |
-|  13 | GPIO 23 | 33 || 34 | 0v      |     |
-|  19 | GPIO 24 | 35 || 36 | GPIO 27 | 16  |
-|  26 | GPIO 25 | 37 || 38 | GPIO 28 | 20  |
-|     |      0v | 39 || 40 | GPIO 29 | 21  |
-+-----+---------+----++----+---------+-----+
-*/
-
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/stianeikeland/go-rpio/v4"
+	"gopkg.in/yaml.v2"
 )
 
+type Config struct {
+	Pins []int `yaml:"pins"`
+	PollIntervalMs int `yaml:"pollIntervalMs"`
+	WetThreshold int `yaml:"wetThreshold"`
+	DryThreshold int `yaml:"dryThreshold"`
+}
+
 func main() {
+	// Parse command-line arguments
+	configPath := flag.String("c", "configs/configs.yaml", "path to config file")
+	flag.Parse()
+
+	// Read config from file
+	configFile, err := ioutil.ReadFile(*configPath)
+	if err != nil {
+		fmt.Printf("Failed to read config file: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Parse config
+	var configs Config
+	if err := yaml.Unmarshal(configFile, &configs); err != nil {
+		fmt.Println("Failed to parse config:", err)
+		os.Exit(1)
+	}
+	if len(configs.Pins) == 0 {
+		fmt.Println("No pins specified in config")
+		os.Exit(1)
+	}
+	fmt.Printf("Config: %+v\n", configs)
+
 	// Open and map memory to access gpio, check for errors
 	if err := rpio.Open(); err != nil {
 		fmt.Println(err)
@@ -58,12 +63,14 @@ func main() {
 		os.Exit(0)
 	}()
 
-	pin := rpio.Pin(4)
-	pin.Input()
-	pin.PullDown()
-
 	for {
-		fmt.Println("PullDown:", pin.Read())
-		time.Sleep(1500 * time.Millisecond)
+		fmt.Println("---")
+		for _, pin := range configs.Pins {
+			pin := rpio.Pin(pin)
+			pin.Input()
+			pin.PullDown()
+			fmt.Printf("Pin %d = %d\n", pin, pin.Read())
+		}
+		time.Sleep(time.Duration(configs.PollIntervalMs) * time.Millisecond)
 	}
 }
