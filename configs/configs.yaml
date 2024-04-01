@@ -1,7 +1,6 @@
-pollIntervalMs: 1500
-wetThreshold: 500
-dryThreshold: 300
-pins:
-  - 4
-  - 17
-  - 27
+threshold:
+  wet: 50
+  dry: 30
+pin:
+  sensor: 20
+  pump: 25
