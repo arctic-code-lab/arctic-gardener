@@ -1,6 +1,5 @@
 threshold:
-  wet: 50
-  dry: 30
+  wet: 0
+  dry: 20880
 pin:
-  sensor: 20
   pump: 25
