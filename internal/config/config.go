@@ -30,12 +30,10 @@ func NewConfig(configPath string) (Config, error) {
 
 	configFile, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		fmt.Printf("Failed to read config file: %v\n", err)
 		return config, err
 	}
 
 	if err := yaml.Unmarshal(configFile, &config); err != nil {
-		fmt.Println("Failed to parse config:", err)
 		return config, err
 	}
 
