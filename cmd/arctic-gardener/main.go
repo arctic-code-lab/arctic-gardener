@@ -3,9 +3,11 @@ package main
 import (
   "flag"
   "log"
+  "time"
 
-  "github.com/charlesmcchan/arctic-gardener/internal/control/adc"
-  "github.com/stianeikeland/go-rpio/v4"
+  "github.com/charlesmcchan/arctic-gardener/internal/adc"
+  "github.com/charlesmcchan/arctic-gardener/internal/config"
+  "github.com/charlesmcchan/arctic-gardener/internal/gpio"
 )
 
 func main() {
@@ -16,31 +18,27 @@ func main() {
 
   c, err := config.NewConfig(*configPath)
   if err != nil {
-    log.Fatal("Config error:", err)
+    log.Fatal("Error reading config:", err)
   }
-
-  if err := rpio.Open(); err != nil {
-    log.Fatal(err)
-  }
-  defer rpio.Close()
-
   log.Printf("Config: %+v\n", c)
 
-  pin := rpio.Pin(c.Pin.Sensor)
-  pin.Input()
-  pin.PullDown()
-  sensorResult := pin.Read()
-  log.Printf("Pin %d = %d\n", pin, sensorResult)
+  adcReading := adc.Read(c.Pin.Sensor)
+  threshold := c.Threshold.Wet + (c.Threshold.Dry - c.Threshold.Wet) * c.Threshold.Percent / 100
+  log.Printf("Reading: %d\n", adcReading)
+  log.Printf("Threshold: %d\n", threshold)
 
-  pin = rpio.Pin(c.Pin.Pump)
-  pin.Output()
-  if sensorResult == rpio.Low {
-    log.Println("Soil is wet")
-    pin.Low()
+  if adcReading >= threshold {
+    if c.checkLastOn() {
+      duration, err := time.ParseDuration(c.Duration)
+      if err != nil {
+        log.Fatal("Error parsing duration:", err)
+      }
+      gpio.On(c.Pin.Pump, duration)
+      c.UpdateLastOn(*configPath)
+    } else {
+      log.Println("Last on is too recent. Skipping...")
+    }
   } else {
-    log.Println("Soil is dry")
-    pin.High()
+    gpio.Off(c.Pin.Pump)
   }
-
-  adc.NewAdc()
 }

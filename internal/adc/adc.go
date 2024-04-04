@@ -1,8 +1,7 @@
 // Analog to Digital Converter (ADC) library.
-package control
+package adc
 
 import (
-  "fmt"
   "log"
   "periph.io/x/conn/v3/i2c/i2creg"
   "periph.io/x/conn/v3/physic"
@@ -13,12 +12,11 @@ import (
 const (
   AdcMaxValue = 26400 // ADS1115 gives you 32768 steps with 4.096v, with 3.3v which is the 80% of 4.096v we get 26400 steps
   AdcMinValue = 0
-  channel     = ads1x15.Channel0
   inVoltage   = 3300 * physic.MilliVolt
   inFrequency = 1 * physic.Hertz
 )
 
-func NewAdc() {
+func Read(channel int) int {
   // Make sure periph is initialized.
   if _, err := host.Init(); err != nil {
     log.Fatal(err)
@@ -38,27 +36,32 @@ func NewAdc() {
   }
 
   // Obtain an analog pin from the ADC.
-  pin, err := adc.PinForChannel(channel, inVoltage, inFrequency, ads1x15.SaveEnergy)
+  pin, err := adc.PinForChannel(getChannel(channel), inVoltage, inFrequency, ads1x15.SaveEnergy)
   if err != nil {
     log.Fatalln(err)
   }
   defer pin.Halt()
 
   // Read values from ADC.
-  fmt.Println("Single reading")
   reading, err := pin.Read()
-
   if err != nil {
     log.Fatalln(err)
   }
 
-  fmt.Println(reading)
+  return int(reading.Raw)
+}
 
-  // // Read values continuously from ADC.
-  // fmt.Println("Continuous reading")
-  // c := pin.ReadContinuous()
-
-  // for reading := range c {
-  //   fmt.Println(reading)
-  // }
+func getChannel(channel int) ads1x15.Channel {
+  switch channel {
+  case 0:
+    return ads1x15.Channel0
+  case 1:
+    return ads1x15.Channel1
+  case 2:
+    return ads1x15.Channel2
+  case 3:
+    return ads1x15.Channel3
+  default:
+    return ads1x15.Channel0
+  }
 }
