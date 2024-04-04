@@ -23,7 +23,6 @@ type Pin struct {
   Pump int `yaml:"pump"`
 }
 
-// Config represents the configuration for the application.
 type Config struct {
   Pin Pin `yaml:"pin"`
   Threshold Threshold `yaml:"threshold"`
@@ -61,6 +60,7 @@ func UpdateConfig(configPath string, config Config) error {
   return nil
 }
 
+// CheckLastOn checks if the last on time is older than the interval duration.
 func (config Config) CheckLastOn() bool {
   if config.LastOn == "" {
     log.Println("Last on undefined. Proceeding...")
@@ -75,8 +75,6 @@ func (config Config) CheckLastOn() bool {
   log.Printf("Now: %s\n", now.Format(time.RFC3339))
   log.Printf("Last on: %s\n", lastOnTime.Format(time.RFC3339))
 
-  // Compare the difference between current time and last on time
-  // with a threshold duration, e.g. 24 hours
   interval, err := time.ParseDuration(config.Interval)
   if err != nil {
     log.Fatal("Error parsing interval:", err)
@@ -86,6 +84,7 @@ func (config Config) CheckLastOn() bool {
   return timeDifference >= interval
 }
 
+// UpdateLastOn updates the LastOn field in the provided configuration
 func (config Config) UpdateLastOn(configPath string) {
   now := time.Now()
 
@@ -94,21 +93,19 @@ func (config Config) UpdateLastOn(configPath string) {
   if err != nil {
     log.Fatal("Error writing config:", err)
   }
-
-  log.Printf("Updating Last On: %s\n", config.LastOn)
 }
 
 // checkConfig validates the provided configuration.
 // If any validation fails, it returns an error.
-func (c Config) checkConfig() error {
-  if c.Threshold.Wet < adc.AdcMinValue || c.Threshold.Wet > adc.AdcMaxValue {
+func (config Config) checkConfig() error {
+  if config.Threshold.Wet < adc.AdcMinValue || config.Threshold.Wet > adc.AdcMaxValue {
     return fmt.Errorf("WetThreshold must be between %d and %d", adc.AdcMinValue, adc.AdcMaxValue)
   }
-  if c.Threshold.Dry < adc.AdcMinValue || c.Threshold.Dry > adc.AdcMaxValue {
+  if config.Threshold.Dry < adc.AdcMinValue || config.Threshold.Dry > adc.AdcMaxValue {
     return fmt.Errorf("DryThreshold must be between %d and %d", adc.AdcMinValue, adc.AdcMaxValue)
   }
-  if !slices.Contains(gpio.GpioPins, c.Pin.Pump) {
-    return fmt.Errorf("%d is not a valid GPIO pin", c.Pin.Pump)
+  if !slices.Contains(gpio.GpioPins, config.Pin.Pump) {
+    return fmt.Errorf("%d is not a valid GPIO pin", config.Pin.Pump)
   }
   return nil
 }

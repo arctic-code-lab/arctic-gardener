@@ -9,12 +9,6 @@ import (
 	"github.com/stianeikeland/go-rpio/v4"
 )
 
-const (
-	red = "\033[31m"
-	green = "\033[32m"
-	reset = "\033[m"
-)
-
 var GpioPins = []int{4, 5, 6, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27}
 
 func Read(pin int) rpio.State {
@@ -45,14 +39,12 @@ func Write(pin int, value int) {
 }
 
 func On(pin int, duration time.Duration) {
-	log.Printf("%sTurning on pin %d for %s...%s", green, pin, duration, reset)
 	Write(pin, 1)
 	time.Sleep(duration)
 	Off(pin)
 }
 
 func Off(pin int) {
-	log.Printf("%sTurning off pin %d%s", red, pin, reset)
 	Write(pin, 0)
 }
 
