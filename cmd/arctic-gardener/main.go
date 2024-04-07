@@ -1,6 +1,7 @@
 package main
 
 import (
+  "fmt"
   "flag"
   "log"
   "time"
@@ -18,8 +19,9 @@ const (
 )
 
 func main() {
-  flagConfig := flag.String("c", "configs/configs.yaml", "path to config file")
+  flagConfig := flag.String("c", "configs.yaml", "path to config file")
   flagDryRun := flag.Bool("d", false, "dry run")
+  flagSimple := flag.Bool("s", false, "print humidity and exit")
   flag.Parse()
 
   c, err := config.NewConfig(*flagConfig)
@@ -35,6 +37,11 @@ func main() {
   adcReading := adc.Read(c.Pin.Sensor)
   humidity := 100 * (c.Threshold.Dry - adcReading) / (c.Threshold.Dry - c.Threshold.Wet)
   threshold := c.Threshold.Dry - c.Threshold.Percent * (c.Threshold.Dry - c.Threshold.Wet) / 100
+
+  if (*flagSimple) {
+    fmt.Println(humidity)
+    return
+  }
   log.Printf("%d%% %d | %d%% %d\n", humidity ,adcReading, c.Threshold.Percent, threshold)
 
   if adcReading < threshold || *flagDryRun {
