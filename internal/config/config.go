@@ -28,7 +28,7 @@ type Config struct {
   Threshold Threshold `yaml:"threshold"`
   Duration string `yaml:"duration"`
   Interval string `yaml:"interval"`
-  LastOn string `yaml:"lastOn"`
+  LastRun string `yaml:"lastRun"`
 }
 
 // Init reads the configuration from the provided file path
@@ -60,20 +60,18 @@ func UpdateConfig(configPath string, config Config) error {
   return nil
 }
 
-// CheckLastOn checks if the last on time is older than the interval duration.
-func (config Config) CheckLastOn() bool {
-  if config.LastOn == "" {
-    log.Println("Last on undefined. Proceeding...")
+// CheckLastRun checks if the last on time is older than the interval duration.
+func (config Config) CheckLastRun() bool {
+  if config.LastRun == "" {
+    log.Println("Last run undefined. Proceeding...")
     return true
   }
 
   now := time.Now()
-  lastOnTime, err := time.Parse(time.RFC3339, config.LastOn)
+  lastOnTime, err := time.Parse(time.RFC3339, config.LastRun)
   if err != nil {
     log.Fatal("Error parsing lastOn time:", err)
   }
-  log.Printf("Now: %s\n", now.Format(time.RFC3339))
-  log.Printf("Last on: %s\n", lastOnTime.Format(time.RFC3339))
 
   interval, err := time.ParseDuration(config.Interval)
   if err != nil {
@@ -84,11 +82,11 @@ func (config Config) CheckLastOn() bool {
   return timeDifference >= interval
 }
 
-// UpdateLastOn updates the LastOn field in the provided configuration
-func (config Config) UpdateLastOn(configPath string) {
+// UpdateLastRun updates the LastRun field in the provided configuration
+func (config Config) UpdateLastRun(configPath string) {
   now := time.Now()
 
-  config.LastOn = now.Format(time.RFC3339)
+  config.LastRun = now.Format(time.RFC3339)
   err := UpdateConfig(configPath, config)
   if err != nil {
     log.Fatal("Error writing config:", err)

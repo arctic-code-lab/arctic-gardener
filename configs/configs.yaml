@@ -1,9 +1,9 @@
 threshold:
   wet: 9000
   dry: 20700
-  percent: 60
+  percent: 40
 pin:
   sensor: 0
-  pump: 20
-duration: 5s
-interval: 15s
+  pump: 18
+duration: 30s
+interval: 72h

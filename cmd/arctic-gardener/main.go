@@ -18,38 +18,36 @@ const (
 )
 
 func main() {
-  log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-  configPath := flag.String("c", "configs/configs.yaml", "path to config file")
+  flagConfig := flag.String("c", "configs/configs.yaml", "path to config file")
+  flagDryRun := flag.Bool("d", false, "dry run")
   flag.Parse()
 
-  c, err := config.NewConfig(*configPath)
+  c, err := config.NewConfig(*flagConfig)
   if err != nil {
     log.Fatal("Error reading config:", err)
   }
-  log.Printf("Config: %+v\n", c)
+
+  duration, err := time.ParseDuration(c.Duration)
+  if err != nil {
+    log.Fatal("Error parsing duration:", err)
+  }
 
   adcReading := adc.Read(c.Pin.Sensor)
-  threshold := c.Threshold.Wet + (c.Threshold.Dry - c.Threshold.Wet) * c.Threshold.Percent / 100
-  log.Printf("Reading: %d\n", adcReading)
-  log.Printf("Threshold: %d\n", threshold)
+  humidity := 100 * (c.Threshold.Dry - adcReading) / (c.Threshold.Dry - c.Threshold.Wet)
+  threshold := c.Threshold.Dry - c.Threshold.Percent * (c.Threshold.Dry - c.Threshold.Wet) / 100
+  log.Printf("%d%% %d | %d%% %d\n", humidity ,adcReading, c.Threshold.Percent, threshold)
 
-  if adcReading >= threshold {
-    if c.CheckLastOn() {
-      duration, err := time.ParseDuration(c.Duration)
-      if err != nil {
-        log.Fatal("Error parsing duration:", err)
-      }
-      log.Printf("%sTurning on pin %d for %s...%s", green, c.Pin.Pump, duration, reset)
-      gpio.On(c.Pin.Pump, duration)
-
-      log.Printf("Updating Last On: %s\n", c.LastOn)
-      c.UpdateLastOn(*configPath)
-    } else {
-      log.Printf("%sLast run is too recent. Skipping...%s", yellow, reset)
-    }
-  } else {
-    log.Printf("%sTurning off pin %d%s", red, c.Pin.Pump, reset)
-    gpio.Off(c.Pin.Pump)
+  if adcReading < threshold || *flagDryRun {
+    return
   }
+  if c.CheckLastRun() {
+    log.Printf("%sLast run is too recent. Skipping...%s", yellow, reset)
+    return
+  }
+
+  log.Printf("%sTurning on for %s...%s", green, duration, reset)
+  gpio.On(c.Pin.Pump, duration)
+
+  log.Printf("Updating lastRun: %s\n", c.LastRun)
+  c.UpdateLastRun(*flagConfig)
 }
