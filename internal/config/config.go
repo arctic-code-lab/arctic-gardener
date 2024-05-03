@@ -60,8 +60,8 @@ func UpdateConfig(configPath string, config Config) error {
 	return nil
 }
 
-// CheckLastRun checks if the last on time is older than the interval duration.
-func (config Config) CheckLastRun() bool {
+// ShoudRun checks if the last on time is older than the interval duration.
+func (config Config) ShoudRun() bool {
 	if config.LastRun == "" {
 		log.Println("Last run undefined. Proceeding...")
 		return true

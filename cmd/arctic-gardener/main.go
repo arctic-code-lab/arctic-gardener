@@ -34,6 +34,9 @@ func main() {
 		log.Fatal("Error parsing duration:", err)
 	}
 
+	// Reset the state of the pump
+	gpio.Off(c.Pin.Pump)
+
 	adcReading := adc.Read(c.Pin.Sensor)
 	humidity := 100 * (c.Threshold.Dry - adcReading) / (c.Threshold.Dry - c.Threshold.Wet)
 	threshold := c.Threshold.Dry - c.Threshold.Percent*(c.Threshold.Dry-c.Threshold.Wet)/100
@@ -47,7 +50,7 @@ func main() {
 	if adcReading < threshold || *flagDryRun {
 		return
 	}
-	if c.CheckLastRun() {
+	if !c.ShoudRun() {
 		log.Printf("%sLast run is too recent. Skipping...%s", yellow, reset)
 		return
 	}
