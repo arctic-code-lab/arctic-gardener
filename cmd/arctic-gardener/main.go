@@ -58,6 +58,6 @@ func main() {
 	log.Printf("%sTurning on for %s...%s", green, duration, reset)
 	gpio.On(c.Pin.Pump, duration)
 
-	log.Printf("Updating lastRun: %s\n", c.LastRun)
+	log.Printf("Updating lastRun...\n")
 	c.UpdateLastRun(*flagConfig)
 }
