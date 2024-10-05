@@ -1,7 +1,7 @@
 # Install tools using asdf
 tools:
-	@scripts/install-asdf-plugins.sh
-	@scripts/install-asdf-versions.sh
+	@tools/install-asdf-plugins.sh
+	@tools/install-asdf-versions.sh
 
 build:
 	@mkdir -p build
