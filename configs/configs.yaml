@@ -1,9 +1,9 @@
 threshold:
-  wet: 9000
-  dry: 20700
-  percent: 40
+  wet: 9000   # humidity reading for wet condition
+  dry: 20700  # humidity reading for dry condition
+  percent: 40 # percentage of dry condition to trigger watering
 pin:
-  sensor: 0
-  pump: 18
-duration: 30s
-interval: 72h
+  sensor: 0   # GPIO pin for the sensor
+  pump: 18    # GPIO pin for the pump relay
+duration: 30s # how long each watering cycle should last
+interval: 72h # minimum interval between watering cycles to prevent overwatering

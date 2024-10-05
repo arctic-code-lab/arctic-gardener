@@ -10,5 +10,3 @@ Automatic plant watering system on Raspberry Pi
   ```bash
   make tools
   ```
-
-
